@@ -13,7 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Repositories.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Models", "Data.Models\Data.Models.csproj", "{AC16343E-A0EF-4450-B568-38E8F871EC6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data.Options", "Data.Options\Data.Options.csproj", "{3F3B2C5E-3EB9-4F38-A58E-D62A709F749E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Options", "Data.Options\Data.Options.csproj", "{3F3B2C5E-3EB9-4F38-A58E-D62A709F749E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{65438B56-B969-47C2-B0FC-3502B96774CB}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
