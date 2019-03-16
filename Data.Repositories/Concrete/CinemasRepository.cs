@@ -22,8 +22,8 @@ namespace Data.Repositories.Concrete
 			var dockerSecrets = Guard.Argument(() => dockerSecretsOptions).NotNull().Value.Value;
 			var database = Guard.Argument(() => databaseOptions).NotNull().Value.Value;
 
-			var userId = dockerSecrets.MySqlCineworldUser ?? database.MySqlCineworldUser;
-			var password = dockerSecrets.MySqlCineworldPassword ?? database.MySqlCineworldPassword;
+			var userId = dockerSecrets.MySqlCineworldUser ?? database.MySqlCineworldUser ?? throw new ArgumentNullException(nameof(dockerSecrets.MySqlCineworldUser));
+			var password = dockerSecrets.MySqlCineworldPassword ?? database.MySqlCineworldPassword ?? throw new ArgumentNullException(nameof(dockerSecrets.MySqlCineworldPassword));
 
 			var connectionString = $"server={database.Server};port={database.Port:D};user id={userId};password={password};database={database.Name};";
 
