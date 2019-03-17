@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace Data.Api
 {
@@ -26,6 +27,11 @@ namespace Data.Api
 
 			services
 				.AddTransient<Repositories.ICinemasRepository, Repositories.Concrete.CinemasRepository>();
+
+			// Swagger services.
+			services.AddSwaggerGen(options =>
+				options.SwaggerDoc("v1", new Info { Title = "Data.Api", Version = "v1", })
+			);
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -35,6 +41,12 @@ namespace Data.Api
 			{
 				app.UseDeveloperExceptionPage();
 			}
+
+			app
+				.UseSwagger()
+				.UseSwaggerUI(options =>
+					options.SwaggerEndpoint("/swagger/v1/swagger.json", "Data.Api")
+				);
 
 			app.UseMvc();
 		}
