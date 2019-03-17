@@ -1,0 +1,21 @@
+version: '3.7'
+
+services:
+  data:
+    image: eassbhhtgu/data:latest
+    ports:
+      - "21413:80/tcp"
+    secrets:
+      - source: MySqlCineworldUser
+      - source: MySqlCineworldPassword
+
+networks:
+  default:
+    external: true
+    name: my-overlay
+
+secrets:
+  MySqlCineworldUser:
+    external: true
+  MySqlCineworldPassword:
+    external: true
