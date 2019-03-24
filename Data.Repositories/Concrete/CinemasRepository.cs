@@ -22,8 +22,8 @@ namespace Data.Repositories.Concrete
 			var dockerSecrets = Guard.Argument(() => dockerSecretsOptions).NotNull().Value.Value;
 			var database = Guard.Argument(() => databaseOptions).NotNull().Value.Value;
 
-			var userId = dockerSecrets.MySqlCineworldUser ?? database.MySqlCineworldUser ?? throw new ArgumentNullException(nameof(dockerSecrets.MySqlCineworldUser));
-			var password = dockerSecrets.MySqlCineworldPassword ?? database.MySqlCineworldPassword ?? throw new ArgumentNullException(nameof(dockerSecrets.MySqlCineworldPassword));
+			var userId = dockerSecrets.MySqlCineworldUser ?? database.MySqlCineworldUser ?? throw new ArgumentNullException(nameof(Options.DockerSecrets.MySqlCineworldUser));
+			var password = dockerSecrets.MySqlCineworldPassword ?? database.MySqlCineworldPassword ?? throw new ArgumentNullException(nameof(Options.DockerSecrets.MySqlCineworldPassword));
 
 			var connectionString = $"server={database.Server};port={database.Port:D};user id={userId};password={password};database={database.Name};";
 
@@ -60,22 +60,43 @@ namespace Data.Repositories.Concrete
 				commandType: CommandType.StoredProcedure);
 		}
 
-		public async Task<IEnumerable<Cinema>> GetCinemasByIdsAndDateAsync(ICollection<short> ids, ICollection<DateTime> dates)
+		public async Task<IEnumerable<Cinema>> GetCinemasAsync(
+			IReadOnlyCollection<short> ids = default,
+			IReadOnlyCollection<DateTime> dates = default,
+			IReadOnlyCollection<(TimeSpan, TimeSpan)> times = default,
+			IReadOnlyCollection<string> titles = default)
 		{
 			var sql = @"select c.id cinemaId, c.name cinemaName, s.time showTime, f.edi filmEdi, f.title filmTitle
-				from `show` s
-					join `film` f on s.filmEdi = f.edi
-					join `cinema` c on s.cinemaId = c.id
+				from `cineworld`.`show` s
+					join `cineworld`.`film` f on s.filmEdi = f.edi
+					join `cineworld`.`cinema` c on s.cinemaId = c.id
 				where 1=1";
 
-			if (ids.Count > 0)
+			if (ids?.Count > 0)
 			{
 				sql += " and c.id in @ids";
 			}
 
-			if (dates.Count > 0)
+			if (dates?.Count > 0)
 			{
 				sql += " and date(s.time) in @dates";
+			}
+
+			if (times?.Count > 0)
+			{
+				sql += " and (";
+
+				sql += string.Join(" or ", from t in times
+										   select $@"(time(s.time) >= '{t.Item1:hh\:mm\:ss}' and time(s.time) <= '{t.Item2:hh\:mm\:ss}')");
+
+				sql += ")";
+			}
+
+			if (titles?.Count > 0)
+			{
+				sql += " and (";
+				sql += string.Join(" or ", titles.Select(t => $"(f.title like '%{t}%')"));
+				sql += ")";
 			}
 
 			var cinemaDtos = await _connection.QueryAsync<CinemaDto>(sql, new { ids, dates, });
@@ -100,7 +121,7 @@ namespace Data.Repositories.Concrete
 					cinema.Films.Add(film);
 				}
 
-				film.Shows.Add(cinemaDto.ShowTime);
+				film.Shows.Add(DateTime.SpecifyKind(cinemaDto.ShowTime, DateTimeKind.Utc));
 			}
 
 			return cinemas;
@@ -117,39 +138,26 @@ namespace Data.Repositories.Concrete
 					new { _id = cinema.Id, _name = cinema.Name, },
 					commandType: CommandType.StoredProcedure));
 
-				tasks.Add(SaveFilmsAsync(cinema, cinema.Films));
-			}
+				foreach (var film in cinema.Films)
+				{
+					if (film.Edi == default) // Theatre Let
+					{
+						continue;
+					}
 
-			return Task.WhenAll(tasks);
-		}
+					tasks.Add(_connection.ExecuteAsync(
+						"cineworld.film_insert",
+						new { _edi = film.Edi, _title = film.Title, },
+						commandType: CommandType.StoredProcedure));
 
-		public Task SaveFilmsAsync(Cinema cinema, IEnumerable<Film> films)
-		{
-			var tasks = new List<Task>();
-
-			foreach (var film in films)
-			{
-				tasks.Add(_connection.ExecuteAsync(
-					"cineworld.film_insert",
-					new { _edi = film.Edi, _title = film.Title, },
-					commandType: CommandType.StoredProcedure));
-
-				tasks.Add(SaveShowsAsync(cinema, film, film.Shows));
-			}
-
-			return Task.WhenAll(tasks);
-		}
-
-		public Task SaveShowsAsync(Cinema cinema, Film film, IEnumerable<DateTime> shows)
-		{
-			var tasks = new List<Task>();
-
-			foreach (var show in shows)
-			{
-				tasks.Add(_connection.ExecuteAsync(
-					"cineworld.show_insert",
-					new { _cinemaId = cinema.Id, _filmEdi = film.Edi, _time = show, },
-					commandType: CommandType.StoredProcedure));
+					foreach (var show in film.Shows)
+					{
+						tasks.Add(_connection.ExecuteAsync(
+							"cineworld.show_insert",
+							new { _cinemaId = cinema.Id, _filmEdi = film.Edi, _time = show, },
+							commandType: CommandType.StoredProcedure));
+					}
+				}
 			}
 
 			return Task.WhenAll(tasks);

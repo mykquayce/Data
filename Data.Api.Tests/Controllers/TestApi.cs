@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.TestHost;
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Data.Api.Tests.Controllers
@@ -29,7 +30,7 @@ namespace Data.Api.Tests.Controllers
 			_server?.Dispose();
 		}
 
-		public async Task<(HttpStatusCode, string)> SendAsync(HttpMethod method, string relativeUri, string body = default)
+		public async Task<(HttpStatusCode, HttpResponseHeaders, string)> SendAsync(HttpMethod method, string relativeUri, string body = default)
 		{
 			var request = new HttpRequestMessage(method, relativeUri);
 
@@ -42,7 +43,7 @@ namespace Data.Api.Tests.Controllers
 
 			var content = await response.Content?.ReadAsStringAsync();
 
-			return (response.StatusCode, content);
+			return (response.StatusCode, response.Headers, content);
 		}
 	}
 }

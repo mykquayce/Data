@@ -28,6 +28,9 @@ namespace Data.Api
 			services
 				.AddTransient<Repositories.ICinemasRepository, Repositories.Concrete.CinemasRepository>();
 
+			services
+				.AddTransient<Services.ICinemasService, Services.Concrete.CinemasService>();
+
 			// Swagger services.
 			services.AddSwaggerGen(options =>
 				options.SwaggerDoc("v1", new Info { Title = "Data.Api", Version = "v1", })

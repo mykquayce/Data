@@ -24,8 +24,10 @@ namespace Data.Repositories.Tests
 				MySqlCineworldPassword = "9xX9wz61aConBYmdR4szF8OE5BfLo5A9kqn7L6R0D9In5Sb83TPjDNjURyQ0zTrYdXOjy06wDv4tiQWk6D1A3V3Oz6pamLlflHvfbpAauvv4NkXGLvMkGWCW5hrXihA538NWtWNsFcwjXEqtFLPJulJYiix3nkYgtxcH0bbuzgXbVRFxJPBX7ZRYJ8HlYmGugq981q2mWKi02PYtTYsAJ5zHYdJ6ibdXNSAB6PguyOuxA0lSRZz3MYO9Tk5vuUhI3L",
 			};
 
+			var dockerSecrets = new Options.DockerSecrets();
+
 			_repo = new CinemasRepository(
-				Mock.Of<IOptions<Options.DockerSecrets>>(),
+				Mock.Of<IOptions<Options.DockerSecrets>>(o => o.Value == dockerSecrets),
 				Mock.Of<IOptions<Options.Database>>(o => o.Value == database));
 		}
 
@@ -35,14 +37,14 @@ namespace Data.Repositories.Tests
 		[InlineData(new short[] { 23, }, new int[0])]
 		[InlineData(new short[] { 23, }, new[] { 0, })]
 		[InlineData(new short[] { 23, 96, 57, }, new[] { 0, 1, })]
-		public async Task CinemasRepositoryTests_GetCinemasByIdsAndDateAsync_ReturnsPopulatedCinemas(ICollection<short> ids, ICollection<int> days)
+		public async Task CinemasRepositoryTests_GetCinemaAsync_ReturnsPopulatedCinemas(IReadOnlyCollection<short> ids, ICollection<int> days)
 		{
 			// Arrange
 			var today = DateTime.UtcNow.Date;
 			var dateTimes = days.Select(d => today.AddDays(d)).ToList();
 
 			// Act
-			var actual = await _repo.GetCinemasByIdsAndDateAsync(ids, dateTimes);
+			var actual = await _repo.GetCinemasAsync(ids, dateTimes, default, default);
 
 			// Assert
 			Assert.NotNull(actual);
@@ -59,7 +61,7 @@ namespace Data.Repositories.Tests
 			Assert.All(actual.SelectMany(c => c.Films), f => Assert.All(f.Shows, s => Assert.NotEqual(default, s)));
 		}
 
-		[Theory]
+		/*[Theory]
 		[InlineData("htdpvnhtvsntvsrneiutvsrneuintseuirvznhsvtrcnhvtxsnhevxstznevtsrzxnhhnlueituilrtasfunileaswfrtunile")]
 		public async Task CinemasRepositoryTests_SaveFilmsAsync_WithTooLongATitle_DoesntSwallowTheError(string title)
 		{
@@ -83,6 +85,6 @@ namespace Data.Repositories.Tests
 			var mySqlException = (MySql.Data.MySqlClient.MySqlException)exception;
 
 			Assert.StartsWith("Data too long for column '_title' at row ", mySqlException.Message);
-		}
+		}*/
 	}
 }

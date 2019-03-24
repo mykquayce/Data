@@ -13,10 +13,14 @@ namespace Data.Api.Controllers.v1
 	public class CinemaController : ControllerBase
 	{
 		private readonly Repositories.ICinemasRepository _cinemasRepository;
+		private readonly Services.ICinemasService _cinemasService;
 
-		public CinemaController(Repositories.ICinemasRepository cinemasRepository)
+		public CinemaController(
+			Repositories.ICinemasRepository cinemasRepository,
+			Services.ICinemasService cinemasService)
 		{
 			_cinemasRepository = Guard.Argument(() => cinemasRepository).NotNull().Value;
+			_cinemasService = Guard.Argument(() => cinemasService).NotNull().Value;
 		}
 
 		[HttpGet]
@@ -24,11 +28,15 @@ namespace Data.Api.Controllers.v1
 		[ProducesResponseType((int)HttpStatusCode.OK, Type = typeof(IEnumerable<Models.Cinema>))]
 		[ProducesResponseType((int)HttpStatusCode.NotFound)]
 		[ProducesResponseType((int)HttpStatusCode.InternalServerError, Type = typeof(Exception))]
-		public async Task<IActionResult> GetCinemasByIdsAndDateAsync([FromQuery]ICollection<short> id, [FromQuery] ICollection<DateTime> date)
+		public async Task<IActionResult> GetCinemasByIdsAndDateAsync(
+			[FromQuery] IEnumerable<short> id,
+			[FromQuery] IEnumerable<Models.DaysOfWeek> day,
+			[FromQuery] IEnumerable<Models.TimesOfDay> timeOfDay,
+			[FromQuery] IEnumerable<string> title)
 		{
 			try
 			{
-				var results = (await _cinemasRepository.GetCinemasByIdsAndDateAsync(id, date)).ToList();
+				var results = (await _cinemasService.GetCinemasAsync(id, day, timeOfDay, title)).ToList();
 
 				if (results.Count == 0)
 				{

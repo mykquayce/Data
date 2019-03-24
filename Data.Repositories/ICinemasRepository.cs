@@ -7,10 +7,13 @@ namespace Data.Repositories
 {
 	public interface ICinemasRepository : IDisposable
 	{
-		Task<IEnumerable<Cinema>> GetCinemasByIdsAndDateAsync(ICollection<short> ids, ICollection<DateTime> dates);
+		Task<IEnumerable<Cinema>> GetCinemasAsync(
+			IReadOnlyCollection<short> ids = default,
+			IReadOnlyCollection<DateTime> dates = default,
+			IReadOnlyCollection<(TimeSpan, TimeSpan)> times = default,
+			IReadOnlyCollection<string> titles = default);
+
 		Task SaveCinemasAsync(IEnumerable<Cinema> cinemas);
-		Task SaveFilmsAsync(Cinema cinema, IEnumerable<Film> films);
-		Task SaveShowsAsync(Cinema cinema, Film film, IEnumerable<DateTime> shows);
 		Task DeleteCinemasAsync(IEnumerable<short> ids);
 		Task DeleteShowsAsync(short cinemaId);
 	}

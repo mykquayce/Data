@@ -11,13 +11,14 @@
     <PackageReference Include="DockerSecretsConfiguration" Version="1.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="4.0.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Data.Options\Data.Options.csproj" />
     <ProjectReference Include="..\Data.Repositories\Data.Repositories.csproj" />
+    <ProjectReference Include="..\Data.Services\Data.Services.csproj" />
   </ItemGroup>
 
 </Project>

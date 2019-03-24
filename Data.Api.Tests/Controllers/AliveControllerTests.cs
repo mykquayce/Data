@@ -16,7 +16,7 @@ namespace Data.Api.Tests.Controllers
 			using (var testApi = new TestApi())
 			{
 				// Act
-				(_, response) = await testApi.SendAsync(HttpMethod.Get, "/");
+				(_, _, response) = await testApi.SendAsync(HttpMethod.Get, "/");
 			}
 
 			Assert.False(string.IsNullOrWhiteSpace(response));
